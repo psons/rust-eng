@@ -1,0 +1,87 @@
+{
+  "name": "A test Effort",
+  "todo_max_tasks": 6,
+  "goals": [
+    {
+      "id": "647d2a0600681f760030c389",
+      "name": "default goal",
+      "max_objectives": 3,
+      "gid": "647d2a0600681f760030c389",
+      "objectives": [
+        {
+          "name": "default objective",
+          "max_tasks": 1,
+          "oid": "647d2a06002dc0610030c38a",
+          "tasks": []
+        }
+      ]
+    },
+    {
+      "id": "647d2a06000d3bd00030c38b",
+      "name": "Conquer Rust",
+      "max_objectives": 4,
+      "gid": "647d2a06000d3bd00030c38b",
+      "objectives": [
+        {
+          "name": "Learn Custom Errors",
+          "max_tasks": 2,
+          "oid": "647d2a0600b6b3620030c38c",
+          "tasks": [
+            {
+              "status": "todo",
+              "name": "support serialization in eng",
+              "detail": "This is part of the csc463 final project",
+              "tid": "647d2a060076a9960030c38d"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "647d2a0600007e0e0030c38e",
+      "name": "Get a meaningful app on the app store",
+      "max_objectives": 4,
+      "gid": "647d2a0600007e0e0030c38e",
+      "objectives": [
+        {
+          "name": "Master the Observer pattern",
+          "max_tasks": 2,
+          "oid": "647d2a060053d2d20030c38f",
+          "tasks": [
+            {
+              "status": "todo",
+              "name": "Pass Firebase Bindings to screen in EG",
+              "detail": "Fundamental to the csc491 final project",
+              "tid": "647d2a06003a350e0030c390"
+            },
+            {
+              "status": "todo",
+              "name": "Build out the EG display hierarchy",
+              "detail": "important to the csc491 demo for final project",
+              "tid": "647d2a06001e6f3d0030c391"
+            }
+          ]
+        },
+        {
+          "name": "Make voice capture short cuts",
+          "max_tasks": 2,
+          "oid": "647d2a06008289990030c392",
+          "tasks": [
+            {
+              "status": "todo",
+              "name": "Access the EG data store from app intent ",
+              "detail": "Fundamental value of the ios Task App.",
+              "tid": "647d2a0600b39ce20030c393"
+            },
+            {
+              "status": "todo",
+              "name": "Launch the EG app to a screen context",
+              "detail": "Value nd usability ar app store app.",
+              "tid": "647d2a0600fbb5820030c394"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
