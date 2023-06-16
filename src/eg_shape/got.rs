@@ -8,12 +8,11 @@ End Goal app's EffortDomain data hierarchy.
 
 use std::fmt::{Display, Formatter};
 // use std::error::Error;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-use crate::eg_shape::{get_eg_id};
+use crate::eg_shape::get_eg_id;
 
-#[derive(Debug)]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Goal {
     id: String,
     pub name: String,
@@ -27,7 +26,13 @@ impl Goal {
     pub fn new(name: String, max_objectives: u32) -> Goal {
         let gid = get_eg_id(); // digest_string_short(&name);
         let id = gid.clone();
-        Goal {id, name, max_objectives, gid, objectives: vec![] }
+        Goal {
+            id,
+            name,
+            max_objectives,
+            gid,
+            objectives: vec![],
+        }
     }
 
     /// Appends the objective to the objectives list and returns a reference to the objective
@@ -39,23 +44,21 @@ impl Goal {
 
     /*
     // example data has a oid:
-    */
+     */
     /// Return mutable ref to a matching objective if found.
     /// Failure to fine the objective is not necessarily an error because it may
     /// be found in a different goal
-    pub fn get_objective(&mut self, oid: &str) -> Option<&mut Objective>  {
+    pub fn get_objective(&mut self, oid: &str) -> Option<&mut Objective> {
         for objective_mref in &mut self.objectives {
             if objective_mref.oid == oid {
-                return Option::Some(objective_mref)
+                return Option::Some(objective_mref);
             }
         }
         None
     }
-
 }
 
-#[derive(Debug)]
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Objective {
     pub name: String,
     pub max_tasks: u32,
@@ -67,7 +70,12 @@ impl Objective {
     // new method provided to compute oid from name.
     pub fn new(name: String, max_tasks: u32) -> Objective {
         let oid = get_eg_id(); // digest_string_short(&name);
-        Objective {name, max_tasks, oid, tasks: vec![] }
+        Objective {
+            name,
+            max_tasks,
+            oid,
+            tasks: vec![],
+        }
     }
 
     /*
@@ -78,11 +86,9 @@ impl Objective {
         self.tasks.push(task);
         &self.tasks.last().unwrap()
     }
-
 }
 
-#[derive(Debug, Copy)]
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Debug, Copy, Serialize, Deserialize, Clone)]
 #[allow(non_camel_case_types)]
 #[derive(Default)]
 pub enum Status {
@@ -91,7 +97,7 @@ pub enum Status {
     scheduled,
     in_progress,
     unfinished,
-    #[default]          // default: https://doc.rust-lang.org/std/default/trait.Default.html#enums
+    #[default] // default: https://doc.rust-lang.org/std/default/trait.Default.html#enums
     todo,
 }
 
@@ -120,7 +126,22 @@ impl Display for Status {
     }
 }
 
+impl clap::ValueEnum for Status {
+    fn value_variants<'a>() -> &'a [Self] {
+        &[
+            Status::abandoned,
+            Status::completed,
+            Status::scheduled,
+            Status::in_progress,
+            Status::unfinished,
+            Status::todo,
+        ]
+    }
 
+    fn to_possible_value(&self) -> Option<clap::builder::PossibleValue> {
+        Some(clap::builder::PossibleValue::new("todo"))
+    }
+}
 
 pub fn status_opt_from_str(s: &str) -> Option<Status> {
     match s {
@@ -134,25 +155,25 @@ pub fn status_opt_from_str(s: &str) -> Option<Status> {
     }
 }
 
-
-#[derive(Debug)]
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Task {
     pub status: Status,
     pub name: String,
     pub detail: String, // future feature: allow detail to be option so that other platforms can omit the attribute.
-                        // String has a defaul;t of empty string
-                        // https://doc.rust-lang.org/std/string/struct.String.html#impl-Default-for-String
+    // String has a defaul;t of empty string
+    // https://doc.rust-lang.org/std/string/struct.String.html#impl-Default-for-String
     pub tid: String,
 }
-
 
 impl Task {
     // new method provided to compute oid from name.
     pub fn new(status: Status, name: String, detail: String) -> Task {
         let tid = get_eg_id(); // digest_string_short(&name);
-        Task {status, name, detail, tid }
+        Task {
+            status,
+            name,
+            detail,
+            tid,
+        }
     }
 }
-
-

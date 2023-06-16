@@ -7,9 +7,9 @@ Clap Demo from: https://docs.rs/clap/latest/clap/_cookbook/git/index.html
 Serde Demo fom: https://serde.rs/
  */
 
-mod eg_shape;
-mod eg_fs;
 mod eg_cmd;
+mod eg_fs;
+mod eg_shape;
 
 use std::ffi::{OsStr, OsString};
 // use std::fmt::Error;
@@ -19,31 +19,58 @@ use std::error::Error;
 use std::path::PathBuf;
 use std::str::FromStr;
 
-
-use clap::{arg, Arg, ArgMatches, Command}; // unused: ArgGroup
-use eg_cmd::{do_eg_load, do_eg_list, do_eg_goal_location, do_eg_objective_location, do_eg_init, do_eg_addgoal, do_eg_addobjective, do_eg_addtask};
-use eg_shape::got::{Status, status_opt_from_str};
+use clap::{arg, Arg, ArgMatches, Command, Parser}; // unused: ArgGroup
+use eg_cmd::{
+    do_eg_addgoal, do_eg_addobjective, do_eg_addtask, do_eg_goal_location, do_eg_init, do_eg_list,
+    do_eg_load, do_eg_objective_location,
+};
+use eg_shape::got::{status_opt_from_str, Status};
 // use serde::de::Error;
+
+pub trait Runner {
+    fn run(self) -> Result<(), Box<dyn Error>>;
+}
+
+#[derive(Parser)]
+pub enum Cmd {
+    Init(eg_cmd::Init),
+    // Load(eg_cmd::Load), TODO
+    #[command(subcommand)]
+    Add(eg_cmd::Add),
+    //Update(eg_cmd::Update),
+    //Delete(eg_cmd::Delete),
+    //Location(eg_cmd::Location),
+    List(eg_cmd::List),
+}
+
+impl Runner for Cmd {
+    fn run(self) -> Result<(), Box<dyn Error>> {
+        match self {
+            Cmd::Init(inner) => inner.run(),
+            Cmd::Add(inner) => inner.run(),
+            Cmd::List(inner) => inner.run(),
+        }
+    }
+}
 
 /// The -m argumet is used for max objectives in a goal, max_tasks in an an objective
 /// It could also be used fr to do max in the domain, but so far it isn't
 fn process_m_arg(sub_matches: &ArgMatches) -> u32 {
     let mut max_val: u32 = 3;
     if let Some(max_s) = sub_matches.get_one::<String>("m") {
-        match u32::from_str(&*max_s) { // match the value of a Result
+        match u32::from_str(&*max_s) {
+            // match the value of a Result
             Ok(max) => {
                 max_val = max;
                 println!("\t\tmax from -m: {max_s}");
             }
             Err(err) => {
-                need_better_error_handling(
-                    format!("error getting number from -m {max_s}: {err}"));
+                need_better_error_handling(format!("error getting number from -m {max_s}: {err}"));
             }
         }
     }
     max_val
 }
-
 
 fn cli() -> Command {
     Command::new("eng")
@@ -131,8 +158,9 @@ fn cli() -> Command {
 }
 
 fn location_args() -> Vec<clap::Arg> {
-    vec![Arg::new("g").short('g').long("goal"),
-         Arg::new("o").short('o').long("objective")
+    vec![
+        Arg::new("g").short('g').long("goal"),
+        Arg::new("o").short('o').long("objective"),
     ]
 }
 
@@ -141,15 +169,17 @@ fn need_better_error_handling(message: String) {
     // todo.  change to panic to an error return that doesn't look like a program bug
 }
 
+fn neu_main() -> Result<(), Box<dyn Error>> {
+    Cmd::parse().run()
+}
 
-fn main()-> Result<(), Box<dyn Error>>  {
-
+fn main() -> Result<(), Box<dyn Error>> {
     let matches = cli().get_matches();
     match matches.subcommand() {
-
         Some(("init", sub_matches)) => {
-            let domain_name = sub_matches.get_one::<String>("DOMAIN").expect(
-                "An effort domain name is required");
+            let domain_name = sub_matches
+                .get_one::<String>("DOMAIN")
+                .expect("An effort domain name is required");
             do_eg_init(domain_name)?;
         }
 
@@ -160,7 +190,9 @@ fn main()-> Result<(), Box<dyn Error>>  {
                 // no method named `as_str` ... method with a similar name .map(|s| s.as_os_str())
                 .expect("Default list type is 'all'");
             // println!("load: will destroy existing data in a file place known in eg_fs.rs and load from {path:?} ");
-            println!("load: will destroy existing data in the domain store and load from {path:?} ");
+            println!(
+                "load: will destroy existing data in the domain store and load from {path:?} "
+            );
             do_eg_load(path)?;
         }
 
@@ -199,29 +231,35 @@ fn main()-> Result<(), Box<dyn Error>>  {
             let name = sub_matches.get_one::<String>("n").expect("required");
             println!("\t\tname from -n: {name}");
 
-            let default_status= Status::todo;
+            let default_status = Status::todo;
             let mut task_status = default_status;
             if let Some(status_s) = sub_matches.get_one::<String>("s") {
                 task_status = match status_opt_from_str(status_s.as_str()) {
                     Some(status) => {
-                        println!( "\t\tstatus from -s: {}", status);
+                        println!("\t\tstatus from -s: {}", status);
                         status
                     }
                     None => {
-                        println!( "\t\tstatus from -s was not recognized. \
-                         using {:?}", default_status.to_string());
+                        println!(
+                            "\t\tstatus from -s was not recognized. \
+                         using {:?}",
+                            default_status.to_string()
+                        );
                         default_status
                     }
                 };
             } else {
-                println!("\t\tstatus (-s) was not provided. Using {:?}", default_status);
+                println!(
+                    "\t\tstatus (-s) was not provided. Using {:?}",
+                    default_status
+                );
             }
 
             let mut detail_s: &String = &String::default();
             // let mut detail_s: &String = (&Default::default)();
             if let Some(detail) = sub_matches.get_one::<String>("d") {
                 detail_s = detail;
-                println!( "\t\tdetail from -d: {detail}");
+                println!("\t\tdetail from -d: {detail}");
             } else {
                 println!("\t\tDetail (-d) was not provided for the task")
             }
@@ -232,8 +270,10 @@ fn main()-> Result<(), Box<dyn Error>>  {
                 objective_option = Some(objective_id_temp);
                 // error returned later if -o oid is not found in the domain
             } else {
-                println!("\t\tno objective location specified.  \
-                    A pre-specified location will be used.");
+                println!(
+                    "\t\tno objective location specified.  \
+                    A pre-specified location will be used."
+                );
                 objective_option = None
             }
             do_eg_addtask(name, task_status, detail_s, objective_option)?
@@ -246,19 +286,21 @@ fn main()-> Result<(), Box<dyn Error>>  {
 
         Some(("update", sub_matches)) => {
             if let Some(name) = sub_matches.get_one::<String>("n") {
-                println!( "\t\tname to be updated from -n: {name}");
+                println!("\t\tname to be updated from -n: {name}");
             }
             if let Some(detail) = sub_matches.get_one::<String>("d") {
-                println!( "\t\tdetail name from -d: {detail}");
+                println!("\t\tdetail name from -d: {detail}");
             }
             if let Some(max_s) = sub_matches.get_one::<String>("m") {
-                match u32::from_str(&*max_s) { // match the value of a Result
+                match u32::from_str(&*max_s) {
+                    // match the value of a Result
                     Ok(max) => {
-                        println!( "\t\tmax from -m: {max}");
+                        println!("\t\tmax from -m: {max}");
                     }
                     Err(err) => {
-                        need_better_error_handling(
-                            format!("error getting number from -m {max_s}: {err}"));
+                        need_better_error_handling(format!(
+                            "error getting number from -m {max_s}: {err}"
+                        ));
                     }
                 }
             }
@@ -266,28 +308,24 @@ fn main()-> Result<(), Box<dyn Error>>  {
             let o_hash: &String;
             if let Some(o_hash_tmp) = sub_matches.get_one::<String>("o") {
                 o_hash = o_hash_tmp;
-                println!(
-                    "\ttodo: implement update for (gHash: {g_hash}, oHash: {o_hash})");
+                println!("\ttodo: implement update for (gHash: {g_hash}, oHash: {o_hash})");
             } else {
-                println!(
-                    "\ttodo: implement update for (gHash: {g_hash})")
+                println!("\ttodo: implement update for (gHash: {g_hash})")
             }
-            println!(
-                "\ttodo: implement update(slotState). use hashes to update new g, o and t",
-            );
+            println!("\ttodo: implement update(slotState). use hashes to update new g, o and t",);
             println!("instead of slots.");
         }
 
         Some(("location", sub_matches)) => {
             println!("sub command: location");
-            let goal_id: & String;
+            let goal_id: &String;
             if let Some(goal_id_temp) = sub_matches.get_one::<String>("g") {
                 println!("location -g: ");
                 goal_id = goal_id_temp;
                 let _ = do_eg_goal_location(goal_id)?;
             };
 
-            let objective_id: & String;
+            let objective_id: &String;
             if let Some(objective_id_temp) = sub_matches.get_one::<String>("o") {
                 println!("location -o: ");
                 objective_id = objective_id_temp;
