@@ -7,11 +7,6 @@ use crate::{
     eg_shape::{got, EffortDomain},
     Runner,
 };
-// use crate::{
-//     eg_fs::write_to_domain_store,
-//     eg_shape::{self, EffortDomain},
-//     Runner,
-// };
 
 // todo - validate the PATH arg with pathBuf
 // https://doc.rust-lang.org/stable/std/path/struct.PathBuf.html
@@ -39,12 +34,3 @@ impl Runner for Load {
         Ok(())
     }
 }
-//         Some(("load", sub_matches)) => {
-//             let path: &OsStr = sub_matches
-//                 .get_one::<PathBuf>("PATH")
-//                 .map(|s| s.as_os_str())
-//                 // no method named `as_str` ... method with a similar name .map(|s| s.as_os_str())
-//                 .expect("Default list type is 'all'");
-//             // println!("load: will destroy existing data in a file place known in eg_fs.rs and load from {path:?} ");
-//             do_eg_load(path)?;
-//         }

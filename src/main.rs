@@ -20,10 +20,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use clap::{arg, Arg, ArgMatches, Command, Parser}; // unused: ArgGroup
-use eg_cmd::{
-    do_eg_addgoal, do_eg_addobjective, do_eg_addtask, do_eg_goal_location, do_eg_list,
-    do_eg_objective_location,
-};
+use eg_cmd::{do_eg_addtask, do_eg_goal_location, do_eg_objective_location};
 use eg_shape::got::{status_opt_from_str, Status};
 // use serde::de::Error;
 
@@ -33,6 +30,7 @@ pub trait Runner {
 
 // consider eyre error  and error result instead of box dyn error.
 
+/// Command line version End Goal App for decomposing goals to achievable objectives and tasks
 #[derive(Parser)]
 pub enum Cmd {
     Init(eg_cmd::Init),
@@ -41,7 +39,7 @@ pub enum Cmd {
     Add(eg_cmd::Add),
     //Update(eg_cmd::Update),
     //Delete(eg_cmd::Delete),
-    //Location(eg_cmd::Location),
+    Location(eg_cmd::Location),
     List(eg_cmd::List),
 }
 
@@ -51,29 +49,11 @@ impl Runner for Cmd {
             Cmd::Init(inner) => inner.run(),
             Cmd::Load(inner) => inner.run(),
             Cmd::Add(inner) => inner.run(),
+            Cmd::Location(inner) => inner.run(),
             Cmd::List(inner) => inner.run(),
         }
     }
 }
-
-/// The -m argument is used for max objectives in a goal, max_tasks in an an objective
-/// It could also be used fr to do max in the domain, but so far it isn't
-// fn process_m_arg(sub_matches: &ArgMatches) -> u32 {
-//     let mut max_val: u32 = 3;
-//     if let Some(max_s) = sub_matches.get_one::<String>("m") {
-//         match u32::from_str(&*max_s) {
-//             // match the value of a Result
-//             Ok(max) => {
-//                 max_val = max;
-//                 println!("\t\tmax from -m: {max_s}");
-//             }
-//             Err(err) => {
-//                 need_better_error_handling(format!("error getting number from -m {max_s}: {err}"));
-//             }
-//         }
-//     }
-//     max_val
-// }
 
 // fn cli() -> Command {
 //     Command::new("eng")
@@ -82,46 +62,6 @@ impl Runner for Cmd {
 //         .subcommand_required(true)
 //         .arg_required_else_help(true)
 //         // .allow_external_subcommands(true) // see comment in main
-//         .subcommand(
-//             Command::new("init")
-//                 .about("Sets up a data store  with an effort domain for adding tasks")
-//                 .arg(arg!(<DOMAIN> "Name for this effort priority context"))
-//                 .arg_required_else_help(true)
-//         )
-//         .subcommand(
-//             Command::new("load")
-//                 .about("DESTRUCTIVE LOAD! - loads ~/.eng/domain.json from PATH ")
-//                 .arg(arg!(<PATH> "Source file to load").value_parser(clap::value_parser!(PathBuf)))
-//                 .arg_required_else_help(true),
-//                 // .arg(arg!(<PATH> ... "Stuff to add").value_parser(clap::value_parser!(PathBuf)))
-//                 // todo - validate the PATH arg with pathBuf
-//                 // https://doc.rust-lang.org/stable/std/path/struct.PathBuf.html
-//                 // .value_parser(clap::value_parser!(PathBuf))
-//         )
-//         .subcommand(
-//             Command::new("addgoal")
-//                 .about("add a goal to the domain")
-//                 .arg( Arg::new("n").short('n').long("name").required(true) )
-//                 .arg( Arg::new("m").short('m').long("max") )
-//                 .arg_required_else_help(false)
-//         )
-//         .subcommand(
-//             Command::new("addobjective")
-//                 .about("add an objective to the current goal or as specified with --goal")
-//                 .arg( Arg::new("g").short('g').long("goal") )
-//                 .arg( Arg::new("n").short('n').long("name").required(true) )
-//                 .arg( Arg::new("m").short('m').long("max") )
-//                 .arg_required_else_help(false)
-//         )
-//         .subcommand(
-//             Command::new("addtask")
-//                 .about("add a task to the current objective or objective specified with --objective")
-//                 .arg( Arg::new("o").short('o').long("objective").required(false) )
-//                 .arg( Arg::new("n").short('n').long("name").required(true) )
-//                 .arg( Arg::new("s").short('s').long("status").required(false) )
-//                 .arg( Arg::new("d").short('d').long("detail").required(false) )
-//                 .arg_required_else_help(false)
-//         )
 //         .subcommand(
 //             Command::new("update")
 //                 .about("PARSES CMD, BUT NOT IMPLEMENTED: update a Goal, Objective, or Task")
@@ -139,24 +79,6 @@ impl Runner for Cmd {
 //                 .arg(arg!(<HASH> "Hash Code to find and delete"))
 //                 // [g|goal|o|objective|s|sub|subobjective|t|task] [object_path]
 //                 .arg_required_else_help(false)
-//         )
-//         .subcommand(
-//             Command::new("location") // plan to require both -g and -o to set an objective as a location
-//                 .about("set default goal for new objectives or objective for new tasks")
-//                 .args(location_args())
-//         )
-//
-//         .subcommand(
-//             Command::new("list")
-//                 .about("List Goals, objectives, and tasks")
-//                 .arg(
-//                     arg!(--type <TYPE>)
-//                         .value_parser(["all", "sprint", "location"])
-//                         .num_args(0..=1)
-//                         .require_equals(false)
-//                         .default_value("all")
-//                         .default_missing_value("all")
-//                 )
 //         )
 // }
 
