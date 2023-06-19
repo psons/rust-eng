@@ -11,24 +11,26 @@ use super::{context_goal_for_objectives, context_objective_for_tasks};
 /// add an entity to the system
 #[derive(Subcommand)]
 pub enum Add {
-    Goal(Goal),
-    Objective(Objective),
-    Task(Task),
+    Goal(GoalClap),
+    Objective(ObjectiveClap),
+    Task(TaskClap),
 }
 
+/// Implements the first level subcommand Add, delegating to further parsing
 impl Runner for Add {
     fn run(self) -> Result<(), Box<dyn std::error::Error>> {
         match self {
             Add::Goal(inner) => inner.run(),
+            // Add::Goal(inner, thing) => inner.run(),
             Add::Objective(inner) => inner.run(),
             Add::Task(inner) => inner.run(),
         }
     }
 }
 
-/// add a goal to the domain
+/// Command add goal 2nd level sub command Arg Parsing to add a goal to the domain
 #[derive(Parser)]
-pub struct Goal {
+pub struct GoalClap {
     /// name of goal
     #[clap(short, long)]
     name: String,
@@ -38,7 +40,7 @@ pub struct Goal {
     max: u32,
 }
 
-impl Runner for Goal {
+impl Runner for GoalClap {
     fn run(self) -> Result<(), Box<dyn std::error::Error>> {
         let mut ed: EffortDomain = read_from_domain_store()?;
         let new_goal = got::Goal::new(self.name, self.max);
@@ -50,9 +52,10 @@ impl Runner for Goal {
     }
 }
 
-/// add an objective to the current goal or as specified with --goal
+/// Command add goal 2nd level sub command Arg Parsing to add an objective to the current
+/// goal or as specified with --goal
 #[derive(Parser)]
-pub struct Objective {
+pub struct ObjectiveClap {
     /// name of the objective
     #[clap(short, long)]
     name: String,
@@ -66,7 +69,7 @@ pub struct Objective {
     goal: Option<String>,
 }
 
-impl Runner for Objective {
+impl Runner for ObjectiveClap {
     fn run(self) -> Result<(), Box<dyn std::error::Error>> {
         let mut ed: EffortDomain = read_from_domain_store()?;
         let context_g_for_o = context_goal_for_objectives(&mut ed, self.goal.as_ref())?; // goal_option: Option<&String>)
@@ -79,16 +82,18 @@ impl Runner for Objective {
     }
 }
 
-/// add a goal to the domain
+// Clap derive includes rust doc in the help test.
+/// Command add goal 2nd level sub command Arg Parsing to add a task to the current objective
+/// or as specified with --objective
 #[derive(Parser)]
-pub struct Task {
+pub struct TaskClap {
     /// name of the task
     #[clap(short, long)]
     name: String,
 
-    /// current status of the task
+    /// current status of the task.
     #[clap(short, long)]
-    #[arg(value_enum)]
+    #[arg(value_enum, default_value_t)]
     status: got::Status,
 
     /// detail of the task
@@ -100,7 +105,7 @@ pub struct Task {
     objective: Option<String>,
 }
 
-impl Runner for Task {
+impl Runner for TaskClap {
     fn run(self) -> Result<(), Box<dyn std::error::Error>> {
         let mut ed: EffortDomain = read_from_domain_store()?;
         let context_o_for_t = context_objective_for_tasks(&mut ed, self.objective.as_ref())?; // objective_option: Option<&String>)

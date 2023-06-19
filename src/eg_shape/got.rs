@@ -138,8 +138,22 @@ impl clap::ValueEnum for Status {
         ]
     }
 
-    fn to_possible_value(&self) -> Option<clap::builder::PossibleValue> {
-        Some(clap::builder::PossibleValue::new("todo"))
+    /// Clap will not allow values not represented here.
+    fn to_possible_value<'a>(&self) -> Option<clap::builder::PossibleValue> {
+        Some(match self {
+            Status::abandoned => clap::builder::PossibleValue::new("abandoned")
+                .help("Work not completed, but will not be worked on"),
+            Status::completed => {
+                clap::builder::PossibleValue::new("completed").help("Work has been completed")
+            }
+            Status::scheduled => clap::builder::PossibleValue::new("scheduled")
+                .help("Work is scheduled for future, so not included in the current todo"),
+            Status::in_progress => clap::builder::PossibleValue::new("in_progress")
+                .help("Being worked on and not completed."),
+            Status::unfinished => clap::builder::PossibleValue::new("unfinished")
+                .help("Work was not completed at the end of some past sprint being reported"),
+            Status::todo => clap::builder::PossibleValue::new("todo").help("Future work expected"),
+        })
     }
 }
 

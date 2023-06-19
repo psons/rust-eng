@@ -13,40 +13,42 @@ use std::fs;
 mod add;
 mod init;
 mod list;
+mod load;
 
 pub use add::Add;
 pub use init::Init;
 pub use list::List;
+pub use load::Load;
 
-pub fn do_eg_init(name: &str) -> Result<(), Box<dyn Error>> {
-    let ed: EffortDomain = eg_shape::init_domain_data(name.to_string());
-    // let e_domain_json:String =
-    //     self::eg_shape::domain_as_json(
-    //         &self::eg_shape::init_domain_data(name.to_string())
-    //     );
-    // let ed: EffortDomain = serde_json::from_str(&e_domain_json).unwrap();
-    write_to_domain_store(&ed)?;
-    println!("init: Initialized data file for:'{name}' ");
+// pub fn do_eg_init(name: &str) -> Result<(), Box<dyn Error>> {
+//     let ed: EffortDomain = eg_shape::init_domain_data(name.to_string());
+//     // let e_domain_json:String =
+//     //     self::eg_shape::domain_as_json(
+//     //         &self::eg_shape::init_domain_data(name.to_string())
+//     //     );
+//     // let ed: EffortDomain = serde_json::from_str(&e_domain_json).unwrap();
+//     write_to_domain_store(&ed)?;
+//     println!("init: Initialized data file for:'{name}' ");
+//
+//     // let e_domain_yaml:String =
+//     //     self::eg_shape::domain_as_yaml(
+//     //     );
+//     println!("domain:\n{}", ed.as_yaml());
+//
+//     Ok(())
+// }
 
-    // let e_domain_yaml:String =
-    //     self::eg_shape::domain_as_yaml(
-    //     );
-    println!("domain:\n{}", ed.as_yaml());
-
-    Ok(())
-}
-
-/*
-loads the user provided file path and deserializes it to make sure its Ok(),
-assuming it deserializes without an error.
-then re-serializes it to the domain store
- */
-pub fn do_eg_load(path: &OsStr) -> Result<(), Box<dyn Error>> {
-    let file_content_string = fs::read_to_string(path)?;
-    let ed: EffortDomain = serde_json::from_str(&file_content_string).unwrap();
-    write_to_domain_store(&ed)?;
-    Ok(())
-}
+// /*
+// loads the user provided file path and deserializes it to make sure its Ok(),
+// assuming it deserializes without an error.
+// then re-serializes it to the domain store
+//  */
+// pub fn do_eg_load(path: &OsStr) -> Result<(), Box<dyn Error>> {
+//     let file_content_string = fs::read_to_string(path)?;
+//     let ed: EffortDomain = serde_json::from_str(&file_content_string).unwrap();
+//     write_to_domain_store(&ed)?;
+//     Ok(())
+// }
 
 pub fn do_eg_list() -> Result<(), Box<dyn Error>> {
     let ed: EffortDomain = read_from_domain_store()?;

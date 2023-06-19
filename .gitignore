@@ -15,5 +15,20 @@ Cargo.lock
 *.pdb
 
 
-# mac file systeem file
+# mac file system file
 .DS_Store
+
+# Jet brains (C Lion) IDE file.
+# Thinking about a convention to make it s separate personal private repo
+# of the form:
+# 	proj-dot_idea
+# where proj is the name of the curent project.
+# Then maybe make a git hook to cascade a add --all and commit into that repo.
+# same for push.
+# really cool would be to make a rust git comand extension to support that.
+.idea/
+#.idea/vcs.xml
+
+# test data is managed in a separate repo. 
+# See https://github.com/psons/test_data_eg/eng_test_data
+eng_test_data/
